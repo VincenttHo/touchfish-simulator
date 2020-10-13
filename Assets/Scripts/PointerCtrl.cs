@@ -7,8 +7,8 @@ public class PointerCtrl : MonoBehaviour
     public float noiseSize = 1.0f;
     public float maxWidth = 0.5f;
     public float minWidth = 0.5f;
-    private float aniTime = 0.0f;
-    private float aniDir = 1.0f;
+    //private float aniTime = 0.0f;
+    //private float aniDir = 1.0f;
     private LineRenderer lRenderer;
     public GameObject pointer = null;  //小红点
     private PreFrameRaycast raycast;   //光线投射
@@ -28,7 +28,9 @@ public class PointerCtrl : MonoBehaviour
         float aniFactor = Mathf.PingPong(Time.time * pulseSpeed, 1.0f);
         aniFactor = Mathf.Max(minWidth, aniFactor) * maxWidth;
         //设置光线的宽
-        lRenderer.SetWidth(aniFactor, aniFactor);
+        //lRenderer.SetWidth(aniFactor, aniFactor);
+        lRenderer.startWidth = aniFactor;
+        lRenderer.endWidth = aniFactor;
         //光线的起点，枪口的地方
         lRenderer.SetPosition(0, this.gameObject.transform.position);
         if (raycast == null)

@@ -20,7 +20,7 @@ public class PreFrameRaycast : MonoBehaviour
     }
     //返回射线的碰撞信息
     public RaycastHit GetHitInfo()
-    {
+    { 
         if (hitInfo.Equals(null))
         {
             Debug.LogWarning("hitInfo is null");

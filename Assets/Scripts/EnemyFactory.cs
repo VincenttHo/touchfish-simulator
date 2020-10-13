@@ -20,11 +20,31 @@ public class EnemyFactory : MonoBehaviour
     public float initDuractionTime;
     private float initTimer;
 
-    public GameObject enemy;
+    private EnemyGenrateConfig[] enemyGenrateConfigs;
+    private EnemyGenrateConfig currentConfig;
+
+    public GameObject normalEnemy;
+    public GameObject specialEnemy;
+
+    private void Start()
+    {
+        enemyGenrateConfigs = GetComponentsInChildren<EnemyGenrateConfig>();
+        GetLevelConfig();
+    }
 
     private void Update()
     {
-        if(initTimer >= initDuractionTime)
+        InitEnemy();
+    }
+
+    private void LateUpdate()
+    {
+        LevelUpListner();
+    }
+
+    void InitEnemy()
+    {
+        if (initTimer >= currentConfig.initDuractionTime)
         {
             initTimer = 0;
             int dir = Random.Range(1, 5);
@@ -50,12 +70,78 @@ public class EnemyFactory : MonoBehaviour
                 z = Random.Range(rightMin, rightMax);
                 x = Random.Range(downMin, upMax);
             }
-            var newEnemy = Instantiate(enemy);
-            newEnemy.transform.position = new Vector3(x, newEnemy.transform.position.y, z);
+            GameObject enemy = GetEnemy();
+            if (enemy != null)
+            {
+                var newEnemy = Instantiate(enemy);
+                newEnemy.transform.position = new Vector3(x, newEnemy.transform.position.y, z);
+            }
         }
         else
         {
             initTimer += Time.deltaTime;
+        }
+    }
+
+    GameObject GetEnemy()
+    {
+        int enemyNo = Random.Range(1, 3);
+        if(currentConfig.totalEnemy <= 0)
+        {
+            return null;
+        }
+        if(enemyNo == 1)
+        {
+            if(currentConfig.normalEnemy > 0)
+            {
+                currentConfig.normalEnemy--;
+                return normalEnemy;
+            }
+            else
+            {
+                return GetEnemy();
+            }
+        }
+        else if(enemyNo == 2)
+        {
+            if (currentConfig.specialEnemy > 0)
+            {
+                currentConfig.specialEnemy--;
+                return specialEnemy;
+            }
+            else
+            {
+                return GetEnemy();
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    void LevelUpListner()
+    {
+        if(currentConfig.totalEnemy <= 0)
+        {
+            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            if(enemies == null || enemies.Length <= 0)
+            {
+                LevelManager.instance.LevelUp();
+                GetLevelConfig();
+            }
+        }
+    }
+
+    void GetLevelConfig()
+    {
+        for(int n = 0; n < enemyGenrateConfigs.Length; n++)
+        {
+            if(enemyGenrateConfigs[n].level == LevelManager.instance.currentLevel)
+            {
+                currentConfig = enemyGenrateConfigs[n];
+                break;
+            }
         }
     }
 

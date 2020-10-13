@@ -14,13 +14,22 @@ public class PlayerController : MonoBehaviour
     public GameObject bullet;
     public Transform shootPos;
     private Vector3 target;
-    public float shootIntervalTime;
-    private float shootTimer;
+    public bool canHurt;
+    private MeshRenderer meshRenderer;
+
+    [Header("无敌时间")]
+    public float invincibleDuration;
+    /** 无敌计时器 */
+    private float invincibleTimer;
+
+    [Header("受伤闪烁间隔")]
+    public float blinkInterval;
+    private float blinkTimer;
 
     void Start()
     {
         rigi = GetComponent<Rigidbody>();
-        shootTimer = shootIntervalTime;
+        meshRenderer = GetComponent<MeshRenderer>();
     }
 
     void Update()
@@ -46,18 +55,49 @@ public class PlayerController : MonoBehaviour
         }
         velocity = new Vector3(x, 0, z);
         LookMouse();
-        if(Input.GetMouseButton(0))
+        
+
+
+        if (!canHurt)
         {
-            if(shootTimer >= shootIntervalTime)
+            Blink();
+            if (invincibleTimer <= invincibleDuration)
             {
-                var newBullet = GameObject.Instantiate(bullet);
-                newBullet.transform.position = shootPos.position;
-                //newBullet.transform.LookAt(target);
-                newBullet.transform.rotation = shootPos.rotation;
-                shootTimer = 0;
+                invincibleTimer += Time.deltaTime;
+            }
+            else
+            {
+                invincibleTimer = 0f;
+                canHurt = true;
             }
         }
-        shootTimer += Time.deltaTime;
+        else
+        {
+            meshRenderer.enabled = true;
+        }
+
+    }
+
+    private void Blink()
+    {
+        // 受伤闪烁
+        if (blinkTimer > blinkInterval)
+        {
+            if (meshRenderer.enabled)
+            {
+                meshRenderer.enabled = false;
+            }
+            else
+            {
+                meshRenderer.enabled = true;
+            }
+            blinkTimer = 0f;
+        }
+        else
+        {
+            blinkTimer += Time.deltaTime;
+        }
+
     }
 
     private void FixedUpdate()
@@ -83,4 +123,14 @@ public class PlayerController : MonoBehaviour
             transform.LookAt(target);
         }
     }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if(other.gameObject.CompareTag("Enemy") && canHurt)
+        {
+            HpManager.instance.Hurt();
+            canHurt = false;
+        }
+    }
+
 }

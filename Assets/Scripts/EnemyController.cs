@@ -6,9 +6,13 @@ public class EnemyController : MonoBehaviour
 {
     public int hp;
     public float speed;
-    private Rigidbody rigi;
-    private GameObject player;
-    private MeshRenderer meshRenderer;
+    protected Rigidbody rigi;
+    protected GameObject player;
+    protected MeshRenderer meshRenderer;
+
+    private bool canInvisibleDestory;
+
+    public int money;
 
     enum HpColor
     {
@@ -17,7 +21,7 @@ public class EnemyController : MonoBehaviour
         YELLOW = 1
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         rigi = GetComponent<Rigidbody>();
         player = GameObject.FindGameObjectWithTag("Player");
@@ -26,15 +30,18 @@ public class EnemyController : MonoBehaviour
         ChangeColor();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
-        transform.LookAt(player.transform);
-        rigi.velocity = transform.forward * speed;
+        if(player != null)
+        {
+            transform.LookAt(player.transform);
+            rigi.velocity = transform.forward * speed;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Bullet"))
+        if (other.CompareTag("Bullet"))
         {
             int atk = other.GetComponent<BulletController>().atk;
             hp -= atk;
@@ -49,6 +56,9 @@ public class EnemyController : MonoBehaviour
             Destroy(other.gameObject);
         }
     }
+
+
+
     private void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.CompareTag("Bullet"))
@@ -57,6 +67,8 @@ public class EnemyController : MonoBehaviour
             hp -= atk;
             if (hp <= 0)
             {
+                ScoreController.instance.AddScore(1);
+                MoneyController.instance.AddMoney(money);
                 Destroy(gameObject);
             }
             else
@@ -82,4 +94,18 @@ public class EnemyController : MonoBehaviour
             meshRenderer.material.color = Color.yellow;
         }
     }
+
+    private void OnBecameVisible()
+    {
+        canInvisibleDestory = true;
+    }
+
+    private void OnBecameInvisible()
+    {
+        if(canInvisibleDestory)
+        {
+            Destroy(gameObject);
+        }
+    }
+
 }

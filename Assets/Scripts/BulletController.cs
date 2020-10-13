@@ -14,4 +14,9 @@ public class BulletController : MonoBehaviour
         rigi = GetComponent<Rigidbody>();
         rigi.velocity = rigi.velocity + transform.forward * speed;
     }
+
+    private void OnBecameInvisible()
+    {
+        Destroy(gameObject);
+    }
 }

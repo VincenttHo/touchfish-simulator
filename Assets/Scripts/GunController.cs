@@ -7,20 +7,33 @@ public class GunController : MonoBehaviour
     public GameObject bullet;
     public Transform shootPos;
 
-    private PreFrameRaycast raycast;
+    public float shootIntervalTime;
+    private float shootTimer;
 
-    private void Start()
+    protected void Start()
     {
-        raycast = GetComponent<PreFrameRaycast>();
+        shootTimer = shootIntervalTime;
     }
 
-    void Update()
+    protected void Update()
     {
-        if(Input.GetMouseButtonDown(0))
+        shootTimer += Time.deltaTime;
+    }
+
+    protected virtual void Shoot()
+    {
+        if (shootTimer >= shootIntervalTime)
         {
-            var newBullet = GameObject.Instantiate(bullet);
-            newBullet.transform.position = shootPos.position;
-            RaycastHit hitInfo = raycast.GetHitInfo();
+            InitBullet();
+            shootTimer = 0;
         }
     }
+
+    protected virtual void InitBullet()
+    {
+        var newBullet = GameObject.Instantiate(bullet);
+        newBullet.transform.position = shootPos.position;
+        newBullet.transform.rotation = shootPos.rotation;
+    }
+
 }
